@@ -45,6 +45,7 @@ THEN that will be shown on the page, and added to their transaction history when
 [![License](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 ## Test
+PRESS Image to live Demo
 
 [![image](images/demo.png)](https://enline-offline-budget.herokuapp.com/)
 
