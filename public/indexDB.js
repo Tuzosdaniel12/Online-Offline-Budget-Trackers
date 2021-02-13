@@ -4,12 +4,12 @@ const request = indexedDB.open('budget', 1);
 
 request.onupgradeneeded = e =>{
     //create object pending 
-    const db = e.target.res;
+    const db = e.target.result;
     db.createObjectStore('transaction', { autoIncrement: true });
 };
 
 request.onsuccess =  e =>{
-    db = e.target.res;
+    db = e.target.result;
 
     //check if online before reading
     if(navigator.onLine){
@@ -29,7 +29,7 @@ const saveTransaction = data =>{
   const store = transaction.objectStore("transaction");
 
   // add data to your store with add method.
-  store.add(record); 
+  store.add(data); 
 }
 
 function checkDatabase() {
