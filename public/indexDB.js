@@ -53,10 +53,10 @@ function checkDatabase() {
                 })
                 response.json()
                 
-                const transaction = db.transaction(["pending"], "readwrite");
+                const transaction = db.transaction(["transaction"], "readwrite");
         
                 // access your pending object store
-                 const store = transaction.objectStore("pending");
+                 const store = transaction.objectStore("transaction");
           
                 // clear all items in your store
                 store.clear();
