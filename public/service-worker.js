@@ -1,17 +1,14 @@
-const CACHE_NAME = "static-cache-v2";
-const DATA_CACHE_NAME = "data-cache-v1";
+const STATIC_BUDGET = "static-budget-v3";
+const DATA_BUDGET = "data-budget-v3";
 
 const FILES_TO_CACHE = [
   '/',
   '/index.html',
   '/manifest.webmanifest',
   '/styles.css',
-  '/indexDB.js',
   '/index.js',
   '/icons/icon-192x192.png',
-  '/icons/icon-512x512.png',
-  'https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css',
-  'https://use.fontawesome.com/releases/v5.8.2/css/all.css'
+  '/icons/icon-512x512.png'
 ];
 
 // const CACHE_NAME = "static-cache-v2";
@@ -21,12 +18,12 @@ const FILES_TO_CACHE = [
 self.addEventListener("install", async (evt)=> {
     // pre cache image data
     evt.waitUntil(
-        caches.open(DATA_CACHE_NAME).then((cache) => cache.add("/api/transaction"))
+        caches.open(DATA_BUDGET).then((cache) => cache.add("/api/transaction"))
     );
         
     // pre cache all static assets
     evt.waitUntil(
-        caches.open(CACHE_NAME).then((cache) => cache.addAll(FILES_TO_CACHE))
+        caches.open(STATIC_BUDGET).then((cache) => cache.addAll(FILES_TO_CACHE))
     );
     self.skipWaiting()
 });
@@ -36,7 +33,7 @@ self.addEventListener("activate", function(evt) {
       caches.keys().then(keyList => {
         return Promise.all(
           keyList.map(key => {
-            if (key !== CACHE_NAME && key !== DATA_CACHE_NAME) {
+            if (key !== STATIC_BUDGET && key !== DATA_BUDGET) {
               console.log("Removing old cache data", key);
               return caches.delete(key);
             }
@@ -51,7 +48,7 @@ self.addEventListener("activate", function(evt) {
   self.addEventListener('fetch', async (evt) => {
     if (evt.request.url.includes("/api/")) {
         evt.respondWith(
-          caches.open(DATA_CACHE_NAME).then(cache => {
+          caches.open(DATA_BUDGET).then(cache => {
             return fetch(evt.request)
               .then(response => {
                 // If the response was good, clone it and store it in the cache.
@@ -72,7 +69,7 @@ self.addEventListener("activate", function(evt) {
       }
 
         evt.respondWith(
-            caches.open(CACHE_NAME).then(cache => {
+            caches.open(STATIC_BUDGET).then(cache => {
               return cache.match(evt.request).then(response => {
                 return response || fetch(evt.request);
               });

@@ -5,7 +5,7 @@ const compression = require("compression");
 require("dotenv").config()
 
 //heroku app
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 8000;
 
 const app = express();
 
