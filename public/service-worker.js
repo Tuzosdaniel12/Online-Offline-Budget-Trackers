@@ -18,20 +18,16 @@ const FILES_TO_CACHE = [
 // const DATA_CACHE_NAME = "data-cache-v1";
 
 // install
-self.addEventListener("install", (evt)=> {
+self.addEventListener("install", async (evt)=> {
     // pre cache image data
-    evt.waitUntil(async () => {
-        const dataCache = await caches.open(DATA_CACHE_NAME);
-        await dataCache.add("/api/transaction");
-    })
-
-    evt.waitUntil(async () => {
-        const staticCache = await caches.open(CACHE_NAME);
-        await staticCache.add(FILES_TO_CACHE);
-    })
-      
-    // tell the browser to activate this service worker immediately once it
-    // has finished installing
+    evt.waitUntil(
+        caches.open(DATA_CACHE_NAME).then((cache) => cache.add("/api/transaction"))
+    );
+        
+    // pre cache all static assets
+    evt.waitUntil(
+        caches.open(CACHE_NAME).then((cache) => cache.addAll(FILES_TO_CACHE))
+    );
     self.skipWaiting()
 });
 
@@ -53,31 +49,33 @@ self.addEventListener("activate", function(evt) {
   });
 
   self.addEventListener('fetch', async (evt) => {
-    // cache successful requests to the API
     if (evt.request.url.includes("/api/")) {
-        evt.respondWith(async () => {
+        evt.respondWith(
+          caches.open(DATA_CACHE_NAME).then(cache => {
+            return fetch(evt.request)
+              .then(response => {
+                // If the response was good, clone it and store it in the cache.
+                if (response.status === 200) {
+                  cache.put(evt.request.url, response.clone());
+                }
+    
+                return response;
+              })
+              .catch(err => {
+                // Network request failed, try to get it from the cache.
+                return cache.match(evt.request);
+              });
+          }).catch(err => console.log(err))
+        );
+    
+        return;
+      }
 
-        try {
-            const cache = await  caches.open(DATA_CACHE_NAME)
-            const response = await fetch(evt.request)
-
-            // If the response was good, clone it and store it in the cache.
-            if (response.status === 200) {
-                cache.put(evt.request.url, response.clone());
-            }
-
-            return response;
-
-            } catch (error) {
-            // Network request failed, try to get it from the cache.
-            return cache.match(evt.request);
-            }
-            });
-        }
-
-
-    evt.respondWith(async () => {
-        const response = await caches.match(evt.request)
-        return response || fetch(evt.request)
+        evt.respondWith(
+            caches.open(CACHE_NAME).then(cache => {
+              return cache.match(evt.request).then(response => {
+                return response || fetch(evt.request);
+              });
+            })
+          );
     })
-})
